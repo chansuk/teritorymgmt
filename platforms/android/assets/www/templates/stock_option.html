@@ -1,0 +1,20 @@
+<ion-view view-title="TelinMY">
+	<ion-nav-buttons side="left">
+		<button class="button button-icon button-clear ion-navicon" menu-toggle="left">
+		</button>
+	</ion-nav-buttons>
+  <ion-content ng-controller="stockOptCtrl">
+		<br>
+		<br>
+    <ion-radio ng-model="vChoice" ng-value="'SIM'">Sim Card</ion-radio>
+		<ion-radio ng-model="vChoice" ng-value="'50'">Voucher RM50</ion-radio>
+		<ion-radio ng-model="vChoice" ng-value="'20'">Voucher RM20</ion-radio>
+		<ion-radio ng-model="vChoice" ng-value="'10'">Voucher RM10</ion-radio>
+		<ion-radio ng-model="vChoice" ng-value="'5'">Voucher RM5</ion-radio>
+		<div class="padding">
+			<button class="button button-block button-balanced" on-tap="actDetail()">
+				Detail Stock
+			</button>
+		</div>
+  </ion-content>
+</ion-view>
