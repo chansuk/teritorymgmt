@@ -44,6 +44,7 @@ angular.module('teritorymgmt', ['ionic', 'teritorymgmt.controllers','teritorymgm
   })
 	.state('app.home', {
 		url: "/home",
+		cache: false,
 		views: {
       'menuContent': {
         templateUrl: "templates/home.html"
@@ -52,6 +53,7 @@ angular.module('teritorymgmt', ['ionic', 'teritorymgmt.controllers','teritorymgm
 	})
 	.state('app.entry', {
 		url: "/entry",
+		cache: false,
 		views: {
       'menuContent': {
         templateUrl: "templates/entry_outlet.html"
@@ -60,6 +62,7 @@ angular.module('teritorymgmt', ['ionic', 'teritorymgmt.controllers','teritorymgm
 	})
 	.state('app.info', {
 		url: "/info",
+		cache: false,
 		views: {
       'menuContent': {
         templateUrl: "templates/info_outlet.html"
@@ -76,6 +79,7 @@ angular.module('teritorymgmt', ['ionic', 'teritorymgmt.controllers','teritorymgm
 	})
 	.state('app.stocklist', {
 		url: "/stocklist",
+		cache: false,
 		views: {
       'menuContent': {
         templateUrl: "templates/stock_list.html"

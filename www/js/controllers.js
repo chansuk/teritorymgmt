@@ -2,24 +2,33 @@ var app = angular.module('teritorymgmt.controllers', []);
 app.controller('mainCtrl', function($scope,userLogin) {
   userLogin.validLogin();
 });
-app.controller('menuCtrl', function($scope, userLogin) {
+app.controller('menuCtrl', function($scope, $location,$state,userLogin) {
   
 	userLogin.validLogin();
 	
 	$scope.actLogOut = function(){
 		userLogin.logout();
 	}
+	
+	$scope.openHome = function(){
+		$location.path('/app/home');
+		
+	}
 });
 
-app.controller('homeCtrl', function($scope,$rootScope,$ionicLoading,userLogin,API) {
+app.controller('homeCtrl', function($scope,$rootScope,$ionicLoading,$window,userLogin,API) {
 	$rootScope.hideBack = false;
   userLogin.validLogin();
+	//$window.location.reload(true);
+	function load(){
+		$ionicLoading.show({template: 'Loading...'});
+		API.sumStock().then(function(data){
+			$ionicLoading.hide();
+			$scope.dataStock = data.data;
+		});
+	}
 	
-	$ionicLoading.show({template: 'Loading...'});
-	API.sumStock().then(function(data){
-		$ionicLoading.hide();
-		$scope.dataStock = data.data;
-	});
+	load();
 });
 
 app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading,$location,API,geoLoc) {
@@ -123,6 +132,7 @@ app.controller('stockOptCtrl', function($scope, $rootScope,$location) {
 app.controller('stockListCtrl', function($scope, $rootScope,$ionicLoading,$ionicPopup,API) {
 	var type 	= $rootScope.stockOpt;
 	var limitNow	= 10;
+	$scope.inpSearch = '';
 	function load(vSrc,typeSrc,limitRow){
 		if(typeSrc=='SIM'){
 			loadSim(vSrc,limitRow);

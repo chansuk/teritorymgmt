@@ -16,7 +16,7 @@
     </ion-header-bar>
     <ion-content >
       <ion-list>
-				<ion-item class="item-icon-left" nav-clear menu-close href="#/app/home">
+				<ion-item class="item-icon-left" nav-clear menu-close on-tap="openHome()" href="#">
           <i class="icon ion-cube"></i>Stock Dealer
         </ion-item>
         <ion-item class="item-icon-left" nav-clear menu-close href="#/app/entry">
@@ -25,7 +25,7 @@
         <ion-item class="item-icon-left" nav-clear menu-close href="#/app/maintenance">
           <i class="icon ion-wrench"></i>Maintenance
         </ion-item>
-        <ion-item class="item-icon-left" nav-clear menu-close ng-click="actLogOut()">
+        <ion-item class="item-icon-left" nav-clear menu-close ng-click="actLogOut()" href="#">
           <i class="icon ion-power"></i>Logout
         </ion-item>
       </ion-list>
