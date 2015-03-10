@@ -37,74 +37,51 @@ angular.module('teritorymgmt', ['ionic', 'teritorymgmt.controllers','teritorymgm
 	
   $stateProvider
 
-  .state('app', {
+  /*.state('app', {
     url: "/app",
     abstract: true,
     templateUrl: "templates/menu.html"
+  })*/
+	
+	.state('menu', {
+    url: "/menu",
+		cache: false,
+    templateUrl: "templates/menu.html"
   })
-	.state('app.home', {
-		url: "/home",
+	.state('stockdealer', {
+		url: "/stockdealer",
 		cache: false,
-		views: {
-      'menuContent': {
-        templateUrl: "templates/home.html"
-      }
-    }
+		templateUrl: "templates/stock_dealer.html"
 	})
-	.state('app.entry', {
+	.state('entry', {
 		url: "/entry",
-		cache: false,
-		views: {
-      'menuContent': {
-        templateUrl: "templates/entry_outlet.html"
-      }
-    }
+		templateUrl: "templates/entry_outlet.html"
 	})
-	.state('app.info', {
+	.state('info', {
 		url: "/info",
 		cache: false,
-		views: {
-      'menuContent': {
-        templateUrl: "templates/info_outlet.html"
-      }
-    }
+		templateUrl: "templates/info_outlet.html"
 	})
-	.state('app.stockopt', {
+	.state('stockopt', {
 		url: "/stockopt",
-		views: {
-      'menuContent': {
-        templateUrl: "templates/stock_option.html"
-      }
-    }
+		templateUrl: "templates/stock_option.html"
 	})
-	.state('app.stocklist', {
+	.state('stocklist', {
 		url: "/stocklist",
 		cache: false,
-		views: {
-      'menuContent': {
-        templateUrl: "templates/stock_list.html"
-      }
-    }
+		templateUrl: "templates/stock_list.html"
 	})
-	.state('app.maintenance', {
+	.state('maintenance', {
 		url: "/maintenance",
-		views: {
-      'menuContent': {
-        templateUrl: "templates/maintenance_outlet.html"
-      }
-    }
+		templateUrl: "templates/maintenance_outlet.html"
 	})
 	
-	.state('app.login', {
+	.state('login', {
 		url: "/login",
-		views: {
-      'menuContent': {
-        templateUrl: "templates/login.html"
-      }
-    }
+		templateUrl: "templates/login.html"
 	})
 	;
 
   // if none of the above states are matched, use this as the fallback
-  $urlRouterProvider.otherwise('/app/home');
+  $urlRouterProvider.otherwise('/menu');
 });

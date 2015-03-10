@@ -62,6 +62,34 @@ appServ.factory('QRScanService', [function () {
 
 }]);
 
+appServ.factory('camera', function ($q) {
+
+  return {
+    take: function() {
+			var deferred = $q.defer();
+			
+			function onSuccessCam(imageURI) {
+				deferred.resolve(imageURI);
+			}
+
+			function onFailCam(message) {
+				deferred.reject(message);
+			}
+			
+      navigator.camera.getPicture(onSuccessCam, onFailCam, { 
+				quality: 100,
+				targetWidth: 1024,
+				targetHeight: 1024,
+				correctOrientation:true,
+				destinationType: Camera.DestinationType.FILE_URI 
+			});
+		
+			return deferred.promise;
+    }
+  };
+
+});
+
 appServ.factory('sessionData',function ($http,$rootScope) {
 	return {
     setOn: function(data) {
@@ -92,7 +120,7 @@ appServ.factory('userLogin',function($rootScope, $location,$http,sessionData,$q)
     $rootScope.isLoggedIn = false;
 		localStorage.setItem("isLoggedIn", $rootScope.isLoggedIn);
 		sessionData.clear();
-   	$location.path('/app/login');
+   	$location.path('/login');
   });
 	
 		
@@ -100,7 +128,7 @@ appServ.factory('userLogin',function($rootScope, $location,$http,sessionData,$q)
     isLoggedIn: function() { return $rootScope.isLoggedIn; },
     login: function(user, pass) {
 			var deferred = $q.defer();
-			$http.get('http://106.186.19.105:8000/api/signIn?user='+user+'&pass='+pass).
+			$http.get('http://128.199.118.199:8000/api/signIn?user='+user+'&pass='+pass).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -115,9 +143,9 @@ appServ.factory('userLogin',function($rootScope, $location,$http,sessionData,$q)
 			var anu = window.localStorage['isLoggedIn'];
 			
 			if($rootScope.isLoggedIn==true||$rootScope.isLoggedIn=='true'){
-				location.href ='#/app/home';
+				location.href ='#/menu';
 			}else{
-				location.href ='#/app/login';
+				location.href ='#/login';
 			}
 			
 		}
@@ -128,7 +156,7 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 	return {
 		saveOutlet: function(params) {
 			var deferred = $q.defer();
-			$http.get('http://106.186.19.105:8000/api/saveOutlet'+params).
+			$http.get('http://128.199.118.199:8000/api/saveOutlet'+params).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -138,7 +166,7 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		},
 		assignLoc: function(idOutlet,latLong){
 			var deferred = $q.defer();
-			$http.get('http://106.186.19.105:8000/api/assignLoc?idOutlet='+idOutlet+'&latLong='+latLong).
+			$http.get('http://128.199.118.199:8000/api/assignLoc?idOutlet='+idOutlet+'&latLong='+latLong).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -148,7 +176,7 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		},
 		checkOutlet : function(outId){
 			var deferred = $q.defer();
-			$http.get('http://106.186.19.105:8000/api/checkOutlet?idOutlet='+outId).
+			$http.get('http://128.199.118.199:8000/api/checkOutlet?idOutlet='+outId).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -159,7 +187,7 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		sumStock : function(){
 			var dlrID			=	window.localStorage['userData.dealer_id'];
 			var deferred 	= $q.defer();
-			$http.get('http://106.186.19.105:8000/api/sumStock?dealerId='+dlrID).
+			$http.get('http://128.199.118.199:8000/api/sumStock?dealerId='+dlrID).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -170,7 +198,7 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		simList : function(ccid,limitRows){
 			var dlrID			=	window.localStorage['userData.dealer_id'];
 			var deferred 	= $q.defer();
-			$http.get('http://106.186.19.105:8000/api/simList?dealerId='+dlrID+'&ccid='+ccid+'&limit='+limitRows).
+			$http.get('http://128.199.118.199:8000/api/simList?dealerId='+dlrID+'&ccid='+ccid+'&limit='+limitRows).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -181,7 +209,7 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		voucherList : function(vsn,vType,limitRows){
 			var dlrID			=	window.localStorage['userData.dealer_id'];
 			var deferred 	= $q.defer();
-			$http.get('http://106.186.19.105:8000/api/voucherList?dealerId='+dlrID+'&vsn='+vsn+'&type='+vType+'&limit='+limitRows).
+			$http.get('http://128.199.118.199:8000/api/voucherList?dealerId='+dlrID+'&vsn='+vsn+'&type='+vType+'&limit='+limitRows).
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -192,7 +220,38 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		purchase : function(outletId,type,invId){
 			var canvas			=	window.localStorage['userData.id'];
 			var deferred 	= $q.defer();
-			$http.get('http://106.186.19.105:8000/api/purchase?canvas='+canvas+'&outletId='+outletId+'&type='+type+'&invId='+invId).
+			$http.get('http://128.199.118.199:8000/api/purchase?canvas='+canvas+'&outletId='+outletId+'&type='+type+'&invId='+invId).
+			success(function(data, status, headers, config) {
+				deferred.resolve(data);
+			}).error(function(data, status, headers, config) {
+				deferred.reject(status);
+			});
+			return deferred.promise;
+		},
+		stockList: function(codeId,type,limitRows){
+			var dlrID			=	window.localStorage['userData.dealer_id'];
+			var deferred 	= $q.defer();
+			$http.get('http://128.199.118.199:8000/api/stockList?dealerId='+dlrID+'&codeId='+codeId+'&type='+type+'&limit='+limitRows).
+			success(function(data, status, headers, config) {
+				deferred.resolve(data);
+			}).error(function(data, status, headers, config) {
+				deferred.reject(status);
+			});
+			return deferred.promise;
+		},
+		getVersionCode: function(){
+			var deferred 	= $q.defer();
+			$http.get('http://128.199.118.199:8000/api/appversion').
+			success(function(data, status, headers, config) {
+				deferred.resolve(data);
+			}).error(function(data, status, headers, config) {
+				deferred.reject(status);
+			});
+			return deferred.promise;
+		},
+		getNews: function(){
+			var deferred 	= $q.defer();
+			$http.get('http://128.199.118.199:8000/api/news').
 			success(function(data, status, headers, config) {
 				deferred.resolve(data);
 			}).error(function(data, status, headers, config) {
@@ -202,3 +261,20 @@ appServ.factory('API',function($rootScope, $location,$http,$q,postData) {
 		}
 	}
 });
+
+appServ.factory('Camera', ['$q', function($q) {
+  return {
+    getPicture: function(options) {
+      var q = $q.defer();
+
+      navigator.camera.getPicture(function(result) {
+        // Do any magic you need
+        q.resolve(result);
+      }, function(err) {
+        q.reject(err);
+      }, options);
+
+      return q.promise;
+    }
+  }
+}]);

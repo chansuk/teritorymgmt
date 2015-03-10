@@ -1,4 +1,12 @@
-<ion-view view-title="TelinMY">
+<ion-view view-title="TelinMY" ng-controller="entryAllCtrl">
+	<ion-nav-bar class="bar-assertive nav-title-slide-ios7" align-title="center">
+		<!--<ion-nav-back-button class="button-clear"><i class="icon ion-ios7-arrow-back"></i> Back</ion-nav-back-button>-->
+		<ion-nav-buttons side="left" class="button-clear">
+			<button class="button button-clear" on-tap="backView()">    
+			<i class="icon ion-ios7-arrow-back"></i> Back
+			</button>    
+		</ion-nav-buttons>
+	</ion-nav-bar>
   <ion-content ng-controller="entryCtrl">
 		<br>
 		<br>
@@ -6,6 +14,10 @@
 			<label class="item item-input">
 				<span class="input-label">User Name</span>
 				<input type="text" placeholder="..." ng-model="txtUsrNm">
+			</label>
+			<label class="item item-input">
+				<span class="input-label">Password</span>
+				<input type="password" placeholder="..." ng-model="txtPass">
 			</label>
 			<label class="item item-input">
 				<span class="input-label">Outlet Name</span>
@@ -49,7 +61,11 @@
 				<input type="text" placeholder="..." ng-model="txtPos">
 			</label>
 		</div>
+		<img ng-src="{{urlImg}}" style="width:100%"/>
 		<div class="padding">
+			<button class="button button-outline button-balanced" on-tap="getPhoto()" ng-show="btnImg" style="width:100%">
+				Add Image
+			</button>
 			<button class="button button-block button-balanced" on-tap="actEntry()">
 				Save and Assign Location
 			</button>

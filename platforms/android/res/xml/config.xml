@@ -18,6 +18,19 @@
     <feature name="AppVersion">
         <param name="android-package" value="uk.co.whiteoctober.cordova.AppVersion" />
     </feature>
+    <feature name="Camera">
+        <param name="android-package" value="org.apache.cordova.camera.CameraLauncher" />
+    </feature>
+    <feature name="File">
+        <param name="android-package" value="org.apache.cordova.file.FileUtils" />
+        <param name="onload" value="true" />
+    </feature>
+    <feature name="FileTransfer">
+        <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
+    </feature>
+    <feature name="InAppBrowser">
+        <param name="android-package" value="org.apache.cordova.inappbrowser.InAppBrowser" />
+    </feature>
     <splash src="www/res/drawable/icon.png" />
     <preference name="orientation" value="portrait" />
     <preference name="SplashScreen" value="screen" />
@@ -26,7 +39,7 @@
     <description>
         An CambaTech project.
     </description>
-    <author email="hi@ionicframework" href="http://ionicframework.com/">
+    <author email="cambatech@googlegroups.com">
       CambaTech Team
     </author>
     <content src="index.html" />

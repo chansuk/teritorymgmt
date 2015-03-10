@@ -1,8 +1,75 @@
 var app = angular.module('teritorymgmt.controllers', []);
-app.controller('mainCtrl', function($scope,userLogin) {
+app.controller('mainCtrl', function($scope,userLogin,$ionicPlatform,$ionicLoading,$ionicPopup,$rootScope,API) {
   userLogin.validLogin();
+	$rootScope.lastAppVersion = '';
+	$ionicPlatform.ready(function() {
+    cordova.getAppVersion(function(version) {
+			$rootScope.lastAppVersion = 'v'+version;
+			getLastVersion(version);
+		});
+	});
+	
+	function getLastVersion(versionCode){
+		API.getVersionCode().then(function(data){
+			if(versionCode!=data.version_name){
+				var confirmPopup = $ionicPopup.confirm({
+					title: 'Warning',
+					template: 'Please download for a new version '+data.version_name
+				});
+
+				confirmPopup.then(function(res) {
+				 if(res) {
+					 window.open('http://128.199.118.199:8000/TeritoryManagement.apk', '_system');
+					 //download();
+				 }
+				});
+			}
+		});
+	}
+
+	function download(){
+		
+		$ionicLoading.show({template: 'Downloading...'});
+    var fileTransfer = new FileTransfer();
+		fileTransfer.download(
+    "http://developer.android.com/assets/images/home/ics-android.png",
+    "file://mnt/sdcard/Download/ics-android.png",
+    function(entry) {
+        alert("download complete: " + entry.toURL());
+    },
+    function(error) {
+        alert("download error source " + error.source);
+        alert("download error target " + error.target);
+        alert("upload error code" + error.code);
+    });
+	}
+	
+	/*function download(){
+		var fileTransfer = new FileTransfer();
+		var fileURL	= 'file:///mnt/sdcard/Download/';
+		var uri = encodeURI("http://128.199.118.199:8000/TeritoryManagement.apk");
+		$ionicLoading.show({template: 'Downloading...'});
+		fileTransfer.download(
+				uri,
+				fileURL,
+				function(entry) {
+					$ionicLoading.hide();
+						console.log("download complete: " + entry.toURL());
+					alert(entry.toURL());
+				},
+				function(error) {
+					$ionicLoading.hide();
+					alert(error.source);
+						console.log("download error source " + error.source);
+						console.log("download error target " + error.target);
+						console.log("upload error code" + error.code);
+				}
+		);
+		
+	}*/
 });
-app.controller('menuCtrl', function($scope, $location,$state,userLogin) {
+
+app.controller('menuCtrl', function($scope, $location,$state,$ionicLoading,$ionicSlideBoxDelegate,$interval,$timeout,$rootScope,API,userLogin) {
   
 	userLogin.validLogin();
 	
@@ -10,10 +77,58 @@ app.controller('menuCtrl', function($scope, $location,$state,userLogin) {
 		userLogin.logout();
 	}
 	
-	$scope.openHome = function(){
-		$location.path('/app/home');
-		
+	$scope.openStock = function(){
+		$location.path('/stockdealer');
 	}
+	
+	$scope.openMaintenance= function(){
+		$location.path('/maintenance');
+	}
+	
+	$scope.openNew = function(){
+		$location.path('/entry');
+	}
+	
+	$ionicSlideBoxDelegate.update();
+
+	$ionicLoading.show({template: 'Loading...'});
+	API.getNews().then(function(data){
+		$ionicLoading.hide();
+		$scope.newsList = data;
+		$ionicSlideBoxDelegate.update();
+		$interval(function() {
+			var count = $ionicSlideBoxDelegate.slidesCount();
+			var chgIdx= count-1;
+			
+			if($ionicSlideBoxDelegate.currentIndex()==chgIdx){
+				$scope.slideIndex = 0;
+				$ionicSlideBoxDelegate.update();
+				$timeout(function(){ 
+					$ionicSlideBoxDelegate.slide($scope.slideIndex);
+					$ionicSlideBoxDelegate.start();
+				},3000);
+			}
+		}, 3000);
+	});
+	
+	$scope.menuVersion = $rootScope.lastAppVersion;
+});
+
+app.controller('stockDealerCtrl', function($scope,$rootScope,$ionicLoading,$window,$state,userLogin,camera,API){
+	$scope.backView = function(){
+		$state.go('menu');
+	}
+	
+	function load(){
+		$ionicLoading.show({template: 'Loading...'});
+		API.sumStock().then(function(data){
+			$ionicLoading.hide();
+			$scope.dataStock = data.data;
+		});
+	}
+	
+	load();
+	
 });
 
 app.controller('homeCtrl', function($scope,$rootScope,$ionicLoading,$window,userLogin,API) {
@@ -31,7 +146,13 @@ app.controller('homeCtrl', function($scope,$rootScope,$ionicLoading,$window,user
 	load();
 });
 
-app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading,$location,API,geoLoc) {
+app.controller('entryAllCtrl', function($scope,$state) {
+	$scope.backView = function(){
+		$state.go('menu');
+	}
+});
+
+app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading,$location,$state,$timeout,camera,API,geoLoc) {
 	$scope.txtNm 		= "";
 	$scope.txtType	= "";
 	$scope.txtSize 	= "";
@@ -39,9 +160,14 @@ app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading
 	$scope.txtPic 	= "";
 	$scope.txtPhone = "";
 	$scope.txtPos 	= "";
+	$scope.txtPass 	= "";
+	$scope.urlImg 	= "";
+	$scope.btnImg 	= true;
+	$rootScope.outletInfo	= {};
 	
   $scope.actEntry = function(){
 		var txtUsrNm= encodeURIComponent($scope.txtUsrNm);
+		var txtPass	= encodeURIComponent($scope.txtPass);
 		var txtNm 	= encodeURIComponent($scope.txtNm);
 		var txtType = $scope.txtType;
 		var txtSize	= $scope.txtSize;
@@ -52,13 +178,17 @@ app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading
 		var dealerId= encodeURIComponent(window.localStorage['userData.dealer_id']);
 		
 		
-		if(txtNm==''||txtType==''||txtSize==''||txtAddr==''||txtPic==''||txtPhone==''||txtPos==''||txtUsrNm==''){
-			$ionicPopup.alert({
+		if(txtNm==''||txtType==''||txtSize==''||txtAddr==''||txtPic==''||txtPhone==''||txtPos==''||txtUsrNm==''||txtPass==''){
+			var popAlert = $ionicPopup.alert({
 				title: 'Warning!',
 				template: "Please check input form!"
 			});
+			
+			$timeout(function() {
+				 popAlert.close();
+			}, 3000);
 		}else{
-			jParams = "?txtNm="+txtNm+"&txtType="+txtType+"&txtSize="+txtSize+"&txtAddr="+txtAddr+"&txtPic="+txtPic+"&txtPhone="+txtPhone+"&txtPos="+txtPos+"&dealerId="+dealerId+"&txtUsrNm="+txtUsrNm;
+			jParams = "?txtNm="+txtNm+"&txtType="+txtType+"&txtSize="+txtSize+"&txtAddr="+txtAddr+"&txtPic="+txtPic+"&txtPhone="+txtPhone+"&txtPos="+txtPos+"&dealerId="+dealerId+"&txtUsrNm="+txtUsrNm+"&txtPass="+txtPass;
 			$ionicLoading.show({
 				template: 'Saving...'
 			});
@@ -68,15 +198,61 @@ app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading
 					$rootScope.outletInfo = data.data;
 					assignLocEnt(data.data.id);
 				}else{
-					$ionicPopup.alert({
+					var popSave = $ionicPopup.alert({
 						title: 'Warning!',
 						template: data.message
 					});
+					
+					$timeout(function() {
+						 popSave.close();
+					}, 3000);
 				}
 			});
 			
 		}
 		
+	}
+	
+	$scope.getPhoto = function() {
+		camera.take().then(function(data){
+			$scope.urlImg = data;
+			$scope.btnImg = false;
+		});
+	};
+	
+	function onUploadSuccess(r) {
+		$ionicLoading.hide();
+		var dataOut	= angular.fromJson(r.response);
+		$rootScope.outletInfo.urlimg = 'http://128.199.118.199:8000/upload/outlet/'+dataOut.data;
+		$location.path('/info');
+	}
+
+	function onUploadFail(error) {
+		$ionicLoading.hide();
+		var popUpload = $ionicPopup.alert({
+			title: 'Warning!',
+			template: "upload error source " + error.source
+		});
+
+		$timeout(function() {
+			 popUpload.close();
+		}, 3000);
+		$location.path('/info');
+	}
+	
+	function uploadImg(idoutlet) {   
+		var myImg 	= $scope.urlImg;
+		var options = new FileUploadOptions();
+		options.fileKey			= "post";
+		options.chunkedMode = false;
+		var params 			= {};
+		params.idoutlet = idoutlet;
+		options.params 	= params;
+		var ft = new FileTransfer();
+		$ionicLoading.show({
+			template: 'Uploading image...'
+		});
+		ft.upload(myImg, encodeURI("http://128.199.118.199:8000/api/uploadImg"), onUploadSuccess, onUploadFail, options);
 	}
 	
 	function assignLocEnt(idOutlet){
@@ -95,69 +271,160 @@ app.controller('entryCtrl', function($scope,$rootScope,$ionicPopup,$ionicLoading
 				$ionicLoading.hide();
 				if(data.status){
 					$rootScope.outletInfo.location = data.data;
-					$location.path('/app/info');
+					if($scope.urlImg==""){
+						$rootScope.outletInfo.urlimg = '';
+						$location.path('/info');
+					}else{
+						uploadImg(idOutlet);
+					}
 				}else{
-					$ionicPopup.alert({
+					var popAssign = $ionicPopup.alert({
 						title: 'Warning!',
 						template: data.message
 					});
+					
+					$timeout(function() {
+						 popAssign.close();
+					}, 3000);
 				}
 			});
 		})
 	}
 });
 
-app.controller('infoCtrl', function($scope,$rootScope,$location) {
-  var outletDat	= $rootScope.outletInfo;
+app.controller('infoCtrl', function($scope,$rootScope,$location,$ionicHistory) {
+	function pad(n, width, z) {
+		z = z || '0';
+		n = n + '';
+		return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n;
+	}
+	
+	var outletDat	= $rootScope.outletInfo;
 	
 	$scope.latLong	= outletDat.location;
 	$scope.name			= outletDat.outlet;
 	$scope.address	= outletDat.alamat;
 	$scope.pic			= outletDat.pic;
 	$scope.phone		= outletDat.phone;
+	$scope.urlImg		= outletDat.urlimg;
+		
+	var idLogin			= outletDat.login_id;
+	idLogin			= pad(idLogin, 5); 
 	
+	$scope.idOutlet	= outletDat.dealer_id+idLogin;
 	$scope.actEntry	= function(){
-		$location.path('/app/stockopt');
+		$location.path('/stockopt');
 	}
+	//console.log($scope.urlImg);
+	if($scope.urlImg == ''){
+		$scope.imgShow = false;
+	}else{
+		$scope.imgShow = true;
+	}
+	
 });
 
-app.controller('stockOptCtrl', function($scope, $rootScope,$location) {
-	$scope.vChoice = '';
+app.controller('stockOptAllCtrl', function($scope, $state) {
+	$scope.backView = function(){
+		$state.go('info');
+	}
+	
+});
+
+app.controller('stockOptCtrl', function($scope, $rootScope,$ionicPopup,$location,$timeout,$state) {
+	$scope.isSim 	= false;
+	$scope.is50 	= false;
+	$scope.is20 	= false;
+	$scope.is10 	= false;
+	$scope.is5 		= false;
+	$rootScope.stockOpt = {};
+	
 	$scope.actDetail	= function(){
-		$rootScope.stockOpt =	$scope.vChoice;
-		$location.path('/app/stocklist');
+		var select		= false;
+		$rootScope.stockOpt.sim =	$scope.isSim;
+		$rootScope.stockOpt.v50 =	$scope.is50;
+		$rootScope.stockOpt.v20 =	$scope.is20;
+		$rootScope.stockOpt.v10 =	$scope.is10;
+		$rootScope.stockOpt.v5 	=	$scope.is5;
+		
+		if($rootScope.stockOpt.sim){
+				select		= true;
+		}
+
+		if($rootScope.stockOpt.v50){
+			select		= true;
+		}
+
+		if($rootScope.stockOpt.v20){
+			select		= true;
+		}
+
+		if($rootScope.stockOpt.v10){
+			select		= true;
+		}
+
+		if($rootScope.stockOpt.v5){
+			select		= true;
+		}
+		
+		if(select){
+			$location.path('/stocklist');
+		}else{
+			var popSelect = $ionicPopup.alert({
+				title: 'Warning!',
+				template: "Please select first!"
+			});
+			
+			$timeout(function() {
+				 popSelect.close();
+			}, 3000);
+		}
+		
 	}
+	
+	
 });
 
-app.controller('stockListCtrl', function($scope, $rootScope,$ionicLoading,$ionicPopup,API) {
-	var type 	= $rootScope.stockOpt;
+app.controller('stockListCtrl', function($scope, $rootScope,$ionicLoading,$ionicPopup,$state,$timeout,API) {
+	
+	$scope.backView = function(){
+		$state.go('stockopt');
+	}
+	
 	var limitNow	= 10;
+	
+	var type	= '';
+	if($rootScope.stockOpt.sim){
+		type	= type+'sim;';
+	}
+	
+	if($rootScope.stockOpt.v50){
+		type	= type+'50;';
+	}
+	
+	if($rootScope.stockOpt.v20){
+		type	= type+'20;';
+	}
+	
+	if($rootScope.stockOpt.v10){
+		type	= type+'10;';
+	}
+	
+	if($rootScope.stockOpt.v5){
+		type	= type+'5;';
+	}
+	
 	$scope.inpSearch = '';
-	function load(vSrc,typeSrc,limitRow){
-		if(typeSrc=='SIM'){
-			loadSim(vSrc,limitRow);
-		}else{
-			loadVoucher(vSrc,typeSrc,limitRow);
-		}
-	}
 	
-	function loadSim(ccid,limitRows){
+	function load(codeId,type,limitRows){
 		$ionicLoading.show({template: 'Loading...'});
-		API.simList(ccid,limitRows).then(function(data){
+		API.stockList(codeId,type,limitRows).then(function(data){
 			$ionicLoading.hide();
 			$scope.dataList	= data.data;
 		});
 	}
-	
-	function loadVoucher(vsn,vType,limitRows){
-		$ionicLoading.show({template: 'Loading...'});
-		API.voucherList(vsn,vType,limitRows).then(function(data){
-			$ionicLoading.hide();
-			$scope.dataList	= data.data;
-		});
-	}
-	
 	load('',type,limitNow);
+	
 	$scope.actSearch = function(){
 		limitNow	= 10;
 		load($scope.inpSearch,type,limitNow);
@@ -168,20 +435,7 @@ app.controller('stockListCtrl', function($scope, $rootScope,$ionicLoading,$ionic
 		load($scope.inpSearch,type,limitNow);
 	}
 	
-	function setPurchase(invId){
-		var outletId	= $rootScope.outletInfo.id;
-		$ionicLoading.show({template: 'Saving...'});
-		API.purchase(outletId,$rootScope.stockOpt,invId).then(function(data){
-			$ionicLoading.hide();
-			load('',type,10);
-			$ionicPopup.alert({
-				title: 'Warning!',
-				template: data.message
-			});
-		})
-	}
-	
-	$scope.actAlloc = function(inventory){
+	$scope.actAlloc = function(invId,typeStock){
 		var confirmPopup = $ionicPopup.confirm({
 		 	title: 'Warning',
 		 	template: 'Add PO to '+$rootScope.outletInfo.outlet+' ?'
@@ -189,14 +443,36 @@ app.controller('stockListCtrl', function($scope, $rootScope,$ionicLoading,$ionic
 
 	 	confirmPopup.then(function(res) {
 		 if(res) {
-			 setPurchase(inventory);
+			 setPurchase(invId,typeStock);
 		 }
 		});
 		
 	}
+	
+	function setPurchase(invId,typeStock){
+		var outletId	= $rootScope.outletInfo.id;
+		$ionicLoading.show({template: 'Saving...'});
+		API.purchase(outletId,typeStock,invId).then(function(data){
+			$ionicLoading.hide();
+			load('',type,10);
+			var popPurc = $ionicPopup.alert({
+				title: 'Warning!',
+				template: data.message
+			});
+			
+			$timeout(function() {
+				 popPurc.close();
+			}, 3000);
+		})
+	}
 });
 
-app.controller('maintenanceCtrl', function($scope, $ionicPopup,$ionicModal,$rootScope,$location,$ionicLoading,API,QRScanService) {
+app.controller('maintenanceAllCtrl', function($scope, $state) {
+	$scope.backView = function(){
+		$state.go('menu');
+	}
+})
+app.controller('maintenanceCtrl', function($scope, $ionicPopup,$ionicModal,$rootScope,$location,$ionicLoading,$timeout,API,QRScanService) {
   $scope.optMain	= '';
 	
 	$ionicModal.fromTemplateUrl('entryId.html', function($ionicModal) {
@@ -208,10 +484,13 @@ app.controller('maintenanceCtrl', function($scope, $ionicPopup,$ionicModal,$root
 	
   $scope.actSubmit	= function(){
 		if($scope.optMain==''){
-			$ionicPopup.alert({
+			var popMain = $ionicPopup.alert({
 				title: 'Warning!',
 				template: 'Please choose an option!'
 			});
+			$timeout(function() {
+				 popMain.close();
+			}, 3000);
 		}
 		
 		if($scope.optMain=='scan'){
@@ -231,14 +510,25 @@ app.controller('maintenanceCtrl', function($scope, $ionicPopup,$ionicModal,$root
 		API.checkOutlet(outId).then(function(data){
 			$ionicLoading.hide();
 			if(data.status){
-				$rootScope.outletInfo = data.data
+				$rootScope.outletInfo = data.data;
+				
+				if(data.data.urlimg==null){
+					$rootScope.outletInfo.urlimg = '';
+				}else{
+					$rootScope.outletInfo.urlimg = 'http://128.199.118.199:8000/upload/outlet/'+$rootScope.outletInfo.urlimg;
+				}
+				
 				$scope.modal.hide();
-				$location.path('/app/info');
+				$location.path('/info');
 			}else{
-				$ionicPopup.alert({
+				var popCheck = $ionicPopup.alert({
 					title: 'Warning!',
 					template: data.message
 				});
+				
+				$timeout(function() {
+					 popCheck.close();
+				}, 3000);
 			}
 		});
 	}
@@ -248,10 +538,14 @@ app.controller('maintenanceCtrl', function($scope, $ionicPopup,$ionicModal,$root
 			if (result.cancelled) {
 				$ionicLoading.hide();
 				$ionicModal.fromTemplate('').show().then(function() {
-					$ionicPopup.alert({
+					var popCancel = $ionicPopup.alert({
 						title: 'QR Scan Cancelled',
 						template: 'You cancelled it!'
 					});
+					
+					$timeout(function() {
+						 popCancel.close();
+					}, 3000);
 				});
 			}else{
 				var outletId		= result.text;
@@ -261,7 +555,7 @@ app.controller('maintenanceCtrl', function($scope, $ionicPopup,$ionicModal,$root
 	}
 });
 
-app.controller('loginCtrl', function($scope,$rootScope,$location,$ionicPopup,$ionicLoading,sessionData, userLogin) {
+app.controller('loginCtrl', function($scope,$rootScope,$location,$ionicPopup,$ionicLoading,$timeout,sessionData, userLogin) {
   userLogin.validLogin();
 	$scope.pPass = '';
 	$scope.pUser = '';
@@ -277,17 +571,22 @@ app.controller('loginCtrl', function($scope,$rootScope,$location,$ionicPopup,$io
 			if(data.status){
 				$rootScope.isLoggedIn = true;
 				localStorage.setItem("isLoggedIn", true);
-				window.location.replace('#/app/home');
+				window.location.replace('#/menu');
 				sessionData.setOn(data);
 			}else{
-				$ionicPopup.alert({
+				var popLogin = $ionicPopup.alert({
 					title: 'Warning!',
 					template: data.message
 				});
+				
+				$timeout(function() {
+					 popLogin.close();
+				}, 3000);
+				
 				$rootScope.isLoggedIn = false;
 				localStorage.setItem("isLoggedIn", false);
 				sessionData.clear();
-				$location.path('/app/login');
+				$location.path('/login');
 			}
 		});
 	}

@@ -1,4 +1,4 @@
-<ion-side-menus enable-menu-with-back-views="$root.hideBack" ng-controller="menuCtrl">
+<!--<ion-side-menus enable-menu-with-back-views="$root.hideBack" ng-controller="menuCtrl">
   <ion-side-menu-content>
     <ion-nav-bar class="bar-assertive">
       
@@ -31,4 +31,74 @@
       </ion-list>
     </ion-content>
   </ion-side-menu>
-</ion-side-menus>
+</ion-side-menus>-->
+
+<ion-view title="TelinMY" ng-controller="menuCtrl">
+	
+	<ion-nav-bar class="bar-assertive nav-title-slide-ios7" align-title="center">
+	</ion-nav-bar>
+  <ion-content>
+		<ion-list>
+			<div class="item item-divider">
+				New's Update
+			</div>
+		</ion-list>
+		<ion-slide-box auto-play="true" show-pager="false" does-continue="true">
+			
+				<ion-slide ng-repeat="info in newsList">
+					<div class="padding">&nbsp;&nbsp;{{info.news}}</div>
+				</ion-slide>
+			
+		</ion-slide-box>
+		<!--<ion-list>
+			<div class="item item-divider">
+				Navigation
+			</div>
+		</ion-list>
+		<div class="row">
+			<div class="col col-50">
+				<button class="button button-outline button-positive icon-center ion-cube" on-tap="openStock()" style="width:100% !important">
+					<br>Stock Dealer
+				</button>
+			</div>
+			<div class="col">
+				<button class="button button-outline button-balanced icon-center ion-document-text" on-tap="openNew()" style="width:100% !important">
+					<br>New Entry
+				</button>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col col-75">
+				<button class="button button-outline button-energized icon-top ion-wrench" on-tap="openMaintenance()" style="width:100% !important">
+					<br>Maintenance
+				</button>
+			</div>
+			<div class="col">
+				<button class="button button-outline button-assertive icon-center ion-power" on-tap="actLogOut()" style="width:100% !important">
+					<br>Logout
+				</button>
+			</div>
+		</div>-->
+		
+		<ion-list>
+			<div class="item item-divider">
+				Navigation
+			</div>
+			<ion-item class="item-icon-left" nav-clear on-tap="openStock()" href="#">
+				<i class="icon ion-cube"></i>Stock Dealer
+			</ion-item>
+			<ion-item class="item-icon-left" nav-clear href="#/entry">
+				<i class="icon ion-document-text"></i>New Entry
+			</ion-item>
+			<ion-item class="item-icon-left" nav-clear href="#/maintenance">
+				<i class="icon ion-wrench"></i>Maintenance
+			</ion-item>
+			<ion-item class="item-icon-left" nav-clear ng-click="actLogOut()" href="#">
+				<i class="icon ion-power"></i>Logout
+			</ion-item>
+		</ion-list>
+  </ion-content>
+	<div class="tabs tabs-light">
+		{{$root.lastAppVersion}}
+	</div>
+</ion-view>

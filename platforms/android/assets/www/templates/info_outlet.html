@@ -1,13 +1,23 @@
 <ion-view view-title="TelinMY">
-	<ion-nav-buttons side="left">
-		<button class="button button-icon button-clear ion-navicon" menu-toggle="left">
-		</button>
-	</ion-nav-buttons>
+	<ion-nav-bar class="bar-assertive nav-title-slide-ios7" align-title="center">
+		<ion-nav-back-button class="button-clear"><i class="icon ion-ios7-arrow-back"></i> Back</ion-nav-back-button>
+		
+	</ion-nav-bar>
   <ion-content ng-controller="infoCtrl">
-		<img style="width:100%" src="https://maps.googleapis.com/maps/api/staticmap?center={{latLong}}&zoom=18&size=400x400&markers=color:red%7Clabel:A%7C{{latLong}}">
-   
+		<ion-slide-box auto-play="true" show-pager="false" does-continue="true">
+			<ion-slide>
+				<img style="width:100%" src="https://maps.googleapis.com/maps/api/staticmap?center={{latLong}}&zoom=18&size=400x400&markers=color:red%7Clabel:A%7C{{latLong}}">
+			</ion-slide>
+			<ion-slide ng-show="imgShow">
+				<img ng-src="{{urlImg}}" style="width:100%">
+			</ion-slide>
+		</ion-slide-box>
 		<p>
 			<table width="100%">
+				<tr>
+					<td width="40%" style="padding:3px;text-align:right">Outlet ID</td>
+					<td width="60%" style="padding:3px;text-align:left">{{idOutlet}}</td>
+				</tr>
 				<tr>
 					<td width="40%" style="padding:3px;text-align:right">Outlet Name</td>
 					<td width="60%" style="padding:3px;text-align:left">{{name}}</td>
@@ -26,6 +36,8 @@
 				</tr>
 			</table>
 		</p>
+		
+		
 		<div class="padding">
 			<button class="button button-block button-balanced" on-tap="actEntry()">
 				Transaction Entry

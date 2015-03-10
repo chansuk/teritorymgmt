@@ -1,16 +1,25 @@
-<ion-view view-title="TelinMY">
-	<ion-nav-buttons side="left">
-		<button class="button button-icon button-clear ion-navicon" menu-toggle="left">
-		</button>
-	</ion-nav-buttons>
+<ion-view view-title="TelinMY" ng-controller="stockOptAllCtrl">
+	<ion-nav-bar class="bar-assertive nav-title-slide-ios7" align-title="center">
+		<!--<ion-nav-back-button class="button-clear"><i class="icon ion-ios7-arrow-back"></i> Back</ion-nav-back-button>-->
+		<ion-nav-buttons side="left" class="button-clear">
+			<button class="button button-clear" on-tap="backView()">    
+			<i class="icon ion-ios7-arrow-back"></i> Back
+			</button>    
+		</ion-nav-buttons>
+	</ion-nav-bar>
   <ion-content ng-controller="stockOptCtrl">
 		<br>
 		<br>
+		<ion-checkbox ng-model="isSim">Sim Card</ion-checkbox>
+		<ion-checkbox ng-model="is50">Voucher RM50</ion-checkbox>
+		<ion-checkbox ng-model="is20">Voucher RM20</ion-checkbox>
+		<ion-checkbox ng-model="is10">Voucher RM10</ion-checkbox>
+		<ion-checkbox ng-model="is5">Voucher RM5</ion-checkbox><!--
     <ion-radio ng-model="vChoice" ng-value="'SIM'">Sim Card</ion-radio>
 		<ion-radio ng-model="vChoice" ng-value="'50'">Voucher RM50</ion-radio>
 		<ion-radio ng-model="vChoice" ng-value="'20'">Voucher RM20</ion-radio>
 		<ion-radio ng-model="vChoice" ng-value="'10'">Voucher RM10</ion-radio>
-		<ion-radio ng-model="vChoice" ng-value="'5'">Voucher RM5</ion-radio>
+		<ion-radio ng-model="vChoice" ng-value="'5'">Voucher RM5</ion-radio>-->
 		<div class="padding">
 			<button class="button button-block button-balanced" on-tap="actDetail()">
 				Detail Stock

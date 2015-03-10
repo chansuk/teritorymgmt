@@ -1,0 +1,23 @@
+<ion-view view-title="TelinMY" ng-controller="stockDealerCtrl">
+	<ion-nav-bar class="bar-assertive nav-title-slide-ios7" align-title="center">
+		<!--<ion-nav-back-button class="button-clear"><i class="icon ion-ios7-arrow-back"></i> Back</ion-nav-back-button>-->
+		<ion-nav-buttons side="left" class="button-clear">
+			<button class="button button-clear" on-tap="backView()">    
+			<i class="icon ion-ios7-arrow-back"></i> Back
+			</button>    
+		</ion-nav-buttons>
+	</ion-nav-bar>
+  <ion-content>
+		<div class="list">
+			<div class="item item-divider">
+				Available Stock
+			</div>
+			<span ng-repeat="stock in dataStock">
+				<a class="item item-icon-left" href="#">
+					{{stock.type_inv}}
+					<span class="badge badge-assertive">{{stock.tot}}</span>
+				</a>
+			</span>
+		</div>
+  </ion-content>
+</ion-view>
